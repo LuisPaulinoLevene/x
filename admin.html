@@ -191,17 +191,7 @@
 
             let totalUsers = 0;  // Contador para total de usuários
             let totalInPrazo = 0;  // Contador para usuários com datas em prazo
-            let tableContent = `
-                <table id="userTable">
-                    <thead>
-                        <tr>
-                            <th>ID do Documento</th>
-                            <th>Nome</th>
-                            <th>Data de Expiração</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
+            let usersData = [];  // Array para armazenar os dados dos usuários
 
             querySnapshot.forEach((doc) => {
                 const userData = doc.data();
@@ -239,15 +229,34 @@
                     // Não incrementa o total de dentro do prazo se a data for "não definida"
                 }
 
+                usersData.push({ id: doc.id, name: userName, expirationStatus });  // Adiciona os dados no array
+                totalUsers++;  // Incrementa o contador de total de usuários
+            });
+
+            // Ordena os usuários por nome (alfabeticamente)
+            usersData.sort((a, b) => a.name.localeCompare(b.name));
+
+            let tableContent = `
+                <table id="userTable">
+                    <thead>
+                        <tr>
+                            <th>ID do Documento</th>
+                            <th>Nome</th>
+                            <th>Data de Expiração</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            // Gera as linhas da tabela com os dados ordenados
+            usersData.forEach(user => {
                 tableContent += `
                     <tr>
-                        <td class="copyable" data-id="${doc.id}">${doc.id}</td>
-                        <td>${userName}</td>
-                        <td>${expirationStatus}</td>
+                        <td class="copyable" data-id="${user.id}">${user.id}</td>
+                        <td>${user.name}</td>
+                        <td>${user.expirationStatus}</td>
                     </tr>
                 `;
-
-                totalUsers++;  // Incrementa o contador de total de usuários
             });
 
             tableContent += `</tbody></table>`;
