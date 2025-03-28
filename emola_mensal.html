@@ -99,7 +99,7 @@
             <button type="submit">Confirmar Pagamento</button>
             <p class="message" id="error-message" style="display: none;">Erro ao processar pagamento. Tente novamente.</p>
             <p class="message" id="wait-message" style="display: none;">Aguarde pela solicitação do PIN no seu celular e insira-o para confirmar o pagamento.</p>
-            <p class="success-message" id="success-message" style="display: none;">Pagamento realizado com sucesso! Redirecionando...</p>
+            <p class="success-message" id="success-message" style="display: none;">Sucesso! Aguarde aqui ainda...</p>
         </form>
     </div>
 
@@ -183,7 +183,7 @@
                         // Aguarda 2 segundos antes de redirecionar
                         setTimeout(() => {
                             cleanPage();
-                            window.location.href = "./homel.html";
+                            window.location.href = "./homel.html";  // Certifique-se de que este caminho esteja correto
                         }, 2000);
                     }
                 } else {

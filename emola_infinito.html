@@ -99,7 +99,7 @@
             <button type="submit">Confirmar Pagamento</button>
             <p class="message" id="error-message" style="display: none;">Erro ao processar pagamento. Tente novamente.</p>
             <p class="message" id="wait-message" style="display: none;">Aguarde pela solicitação do PIN no seu celular e insira-o para confirmar o pagamento.</p>
-            <p class="success-message" id="success-message" style="display: none;">Pagamento realizado com sucesso! Redirecionando...</p>
+            <p class="success-message" id="success-message" style="display: none;">Sucesso! Aguarde aqui...</p>
         </form>
     </div>
 
@@ -162,20 +162,18 @@
             .then(async (data) => {
                 console.log('Success:', data);
                 if (data && data.response && data.response.success) {
-                    // Atualiza a data para 30 dias a partir de hoje
-                    const currentDate = new Date();
-                    currentDate.setDate(currentDate.getDate() + 30);  // Adiciona 30 dias
-                    const updatedDate = formatDate(currentDate);  // Formata a data no formato dd/mm/yyyy
+                    // Substitui a data por "INFINITO"
+                    const updatedValue = "INFINITO";
 
                     // Atualiza os dados no Firestore
                     const user = auth.currentUser;
                     if (user) {
-                        await updateUserData(user.uid, updatedDate);
+                        await updateUserData(user.uid, updatedValue);
 
                         // Cria o campo 'plano' com valor 'mensal' se não existir
                         await createOrUpdatePlano(user.uid);
 
-                        console.log("Data e plano atualizados.");
+                        console.log("Valor atualizado para INFINITO.");
 
                         // Exibe a mensagem de sucesso temporária
                         document.getElementById('success-message').style.display = 'block';
@@ -183,7 +181,7 @@
                         // Aguarda 2 segundos antes de redirecionar
                         setTimeout(() => {
                             cleanPage();
-                            window.location.href = "./homel.html";
+                            window.location.href = "./homel.html";  // Certifique-se de que este caminho esteja correto
                         }, 2000);
                     }
                 } else {
@@ -207,10 +205,10 @@
         });
 
         // Função para atualizar os dados do usuário no Firestore
-        async function updateUserData(userId) {
+        async function updateUserData(userId, newValue) {
             const userRef = doc(db, "users", userId);
             await updateDoc(userRef, {
-                date: 'INFINITO'  // Atualiza o campo 'date' com a palavra "INFINITO"
+                date: newValue  // Atualiza o valor para "INFINITO"
             });
         }
 
@@ -225,14 +223,6 @@
                     plano: 'infinito'
                 });
             }
-        }
-
-        // Função para formatar a data no formato dd/mm/yyyy
-        function formatDate(date) {
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0'); // Mês é 0-indexed
-            const year = date.getFullYear();
-            return `${day}/${month}/${year}`;
         }
 
         // Função para limpar a página após sucesso ou erro
