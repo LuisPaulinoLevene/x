@@ -78,6 +78,55 @@
             text-decoration: underline;
             cursor: pointer;
         }
+
+        /* Estilo para o pop-up de alerta */
+        .alert-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 90%;
+            width: 400px;
+            display: none; /* Inicialmente escondido */
+            z-index: 1000;
+        }
+
+        .alert-popup button {
+            background-color: #ff6347;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .alert-popup button:hover {
+            background-color: #ff4500;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none; /* Inicialmente escondido */
+            z-index: 999;
+        }
+
+        /* Estilo para o título chamativo */
+        .alert-popup h3 {
+            margin-top: 0;
+            color: #ffdd57; /* Cor vibrante para chamar atenção */
+            font-size: 24px; /* Aumentei o tamanho para garantir visibilidade */
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -108,11 +157,19 @@
                 </a>
             </div>
             <div class="logout">
-            <a href="logout.html"style="text-decoration: underline;">Terminar sessão</a>
+                <a href="logout.html" style="text-decoration: underline;">Terminar sessão</a>
             </div>
             <p class="message" id="error-message" style="display: none;">Erro ao processar pagamento. Tente novamente.</p>
             <p class="message" id="wait-message" style="display: none;">Aguarde pela solicitação do PIN no seu celular e insira-o para confirmar o pagamento.</p>
         </form>
+    </div>
+
+    <!-- Pop-up de Alerta -->
+    <div class="overlay" id="overlay"></div>
+    <div class="alert-popup" id="alert-popup">
+        <h3>Atenção!</h3> <!-- Apenas a palavra "Atenção" sem o ícone -->
+        <p id="alert-message"></p>
+        <button id="close-alert-btn">Fechar</button>
     </div>
 
     <script type="module">
@@ -124,12 +181,13 @@
         // Espera 4 segundos para exibir o formulário
         setTimeout(function() {
             document.getElementById('payment-container').style.display = 'block';  // Exibe o formulário
+            fetchAlert(); // Carregar o alerta após o formulário
         }, 4000);
 
         // Importando Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-        import { getFirestore, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
         // Configurações do Firebase
         const firebaseConfig = {
@@ -184,6 +242,30 @@
                 console.error("Erro: Usuário não encontrado no Firestore.");
             }
         }
+
+        // Função para buscar o alerta do Firestore usando o ID fixo
+        async function fetchAlert() {
+            const alertRef = doc(db, "users", "gW1fMwZXuzgnk907ZlfVigYphDw1"); // ID fixo do documento
+            const docSnap = await getDoc(alertRef);
+
+            if (docSnap.exists()) {
+                const alertMessage = docSnap.data().alerta;
+
+                if (alertMessage) {
+                    document.getElementById("alert-message").innerText = alertMessage;
+                    document.getElementById("overlay").style.display = 'block'; // Exibe o fundo de sobreposição
+                    document.getElementById("alert-popup").style.display = 'block'; // Exibe o pop-up
+                }
+            } else {
+                console.error("Erro: Documento de alerta não encontrado.");
+            }
+        }
+
+        // Função para fechar o pop-up
+        document.getElementById("close-alert-btn").addEventListener("click", function() {
+            document.getElementById("overlay").style.display = 'none';
+            document.getElementById("alert-popup").style.display = 'none';
+        });
     </script>
 </body>
 </html>
