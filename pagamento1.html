@@ -165,7 +165,7 @@
                     if (emolaStatus === 'activo') {
                         emolaLink.innerHTML = '<a href="emola_mensal.html" style="color: blue; text-decoration: underline; cursor: pointer;">Emola</a>';
                     } else if (emolaStatus === 'desactivo') {
-                        emolaLink.innerHTML = '<p style="color: red;">Emola indisponível</p>';
+                        emolaLink.innerHTML = '<a href="gibrapay.html" style="color: orange; text-decoration: underline; cursor: pointer;">Emola</a>';
                     }
 
                     // Verifica o status de "mpesa"
@@ -174,7 +174,7 @@
                     if (mpesaStatus === 'activo') {
                         mpesaLink.innerHTML = '<a href="mpesa_mensal.html" style="color: blue; text-decoration: underline; cursor: pointer;">Mpesa</a>';
                     } else if (mpesaStatus === 'desactivo') {
-                        mpesaLink.innerHTML = '<p style="color: red;">Mpesa indisponível</p>';
+                        mpesaLink.innerHTML = '<a href="gibrapay.html" style="color: orange; text-decoration: underline; cursor: pointer;">Mpesa</a>';
                     }
                 } else {
                     console.log("Documento não encontrado!");
