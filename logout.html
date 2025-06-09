@@ -57,10 +57,10 @@
 
         // Pergunta ao usuário se ele tem certeza que deseja desautenticar
         window.addEventListener('DOMContentLoaded', () => {
-            const confirmLogout = confirm("Tem certeza que deseja terminar a sessão?");
+            const confirmLogout = confirm("Tem certeza que deseja entrar na pagina de login?");
             if (confirmLogout) {
                 // Exibe a mensagem temporária de desautenticação
-                document.querySelector('.container p').textContent = "Terminando sessão";
+                document.querySelector('.container p').textContent = "Aguarde...";
 
                 // Desautentica o usuário e redireciona para o login
                 signOut(auth).then(() => {
