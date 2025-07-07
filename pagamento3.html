@@ -159,22 +159,30 @@
                 if (docSnap.exists()) {
                     const data = docSnap.data();
 
-                    // Verifica o status de "emola"
+                    // Emola
                     const emolaStatus = data.emola;
+                    const emola2Status = data.emola2;
                     const emolaLink = document.getElementById('emola-link');
+
                     if (emolaStatus === 'activo') {
                         emolaLink.innerHTML = '<a href="emola_anual_muda.html" style="color: blue; text-decoration: underline; cursor: pointer;">Emola</a>';
-                    } else if (emolaStatus === 'desactivo') {
-                        emolaLink.innerHTML = '<p style="color: red;">Emola indisponível</p>';
+                    } else if (emolaStatus === 'desactivo' && emola2Status === 'activo') {
+                        emolaLink.innerHTML = '<a href="gibrapay.html" style="color: orange; text-decoration: underline; cursor: pointer;">Emola</a>';
+                    } else {
+                        emolaLink.innerHTML = '<span style="color: gray;">Emola indisponível</span>';
                     }
 
-                    // Verifica o status de "mpesa"
+                    // Mpesa
                     const mpesaStatus = data.mpesa;
+                    const mpesa2Status = data.mpesa2;
                     const mpesaLink = document.getElementById('mpesa-link');
+
                     if (mpesaStatus === 'activo') {
                         mpesaLink.innerHTML = '<a href="mpesa_anual_muda.html" style="color: blue; text-decoration: underline; cursor: pointer;">Mpesa</a>';
-                    } else if (mpesaStatus === 'desactivo') {
-                        mpesaLink.innerHTML = '<p style="color: red;">Mpesa indisponível</p>';
+                    } else if (mpesaStatus === 'desactivo' && mpesa2Status === 'activo') {
+                        mpesaLink.innerHTML = '<a href="gibrapay.html" style="color: orange; text-decoration: underline; cursor: pointer;">Mpesa</a>';
+                    } else {
+                        mpesaLink.innerHTML = '<span style="color: red;">Mpesa indisponível</span>';
                     }
                 } else {
                     console.log("Documento não encontrado!");
