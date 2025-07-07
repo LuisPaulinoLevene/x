@@ -182,7 +182,7 @@
                     } else if (mpesaStatus === 'desactivo' && mpesa2Status === 'activo') {
                         mpesaLink.innerHTML = '<a href="gibrapay.html" style="color: orange; text-decoration: underline; cursor: pointer;">Mpesa</a>';
                     } else {
-                        mpesaLink.innerHTML = '<span style="color: gray;">Mpesa indisponível</span>';
+                        mpesaLink.innerHTML = '<span style="color: red;">Mpesa indisponível</span>';
                     }
                 } else {
                     console.log("Documento não encontrado!");
