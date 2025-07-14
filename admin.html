@@ -66,7 +66,6 @@
             font-size: 16px;
         }
 
-        /* Responsividade */
         @media (max-width: 768px) {
             .container {
                 width: 90%;
@@ -77,7 +76,6 @@
             }
         }
 
-        /* Estilo para os links de inserir data e cadastro manual */
         .admin-links {
             display: flex;
             justify-content: center;
@@ -91,7 +89,6 @@
             font-size: 16px;
         }
 
-        /* Estilo para a mensagem de cópia */
         .copy-message {
             background-color: #4CAF50;
             color: white;
@@ -106,7 +103,6 @@
             display: none;
         }
 
-        /* Estilo para os IDs clicáveis */
         .copyable {
             color: #007bff;
             cursor: pointer;
@@ -127,7 +123,6 @@
         </div>
     </div>
 
-    <!-- Div para a mensagem de cópia -->
     <div id="copyMessage" class="copy-message">
         ID copiado!
     </div>
@@ -137,7 +132,6 @@
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-        // Configurações do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCjR7ByKvIFDoF61CL5u2SmYjZ2SOqGd4I",
             authDomain: "planoautomatico.firebaseapp.com",
@@ -148,23 +142,20 @@
             measurementId: "G-7GZFKCREKH"
         };
 
-        // Inicializa o Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth();
         const db = getFirestore(app);
 
-        // Função para verificar o estado de autenticação e se o usuário é admin
         onAuthStateChanged(auth, (user) => {
             if (!user) {
                 console.log("Usuário não logado. Redirecionando para index.html.");
-                window.location.href = "./index.html";  // Redireciona se o usuário não estiver logado
+                window.location.href = "./index.html";
             } else {
                 console.log("Usuário logado:", user.email);
-                checkIfAdmin(user);  // Verifica se o usuário é admin
+                checkIfAdmin(user);
             }
         });
 
-        // Função para verificar se o usuário tem o campo 'admin' no Firestore
         async function checkIfAdmin(user) {
             const userRef = doc(db, "users", user.uid);
             const docSnap = await getDoc(userRef);
@@ -172,67 +163,60 @@
             if (docSnap.exists()) {
                 const userData = docSnap.data();
 
-                // Verifica se o campo 'admin' existe e é verdadeiro
                 if (userData.admin) {
-                    loadUsersData();  // Carrega e exibe a tabela com dados de usuários
+                    loadUsersData();
                 } else {
-                    showUnauthorizedMessage();  // Exibe mensagem de não autorizado
+                    showUnauthorizedMessage();
                 }
             } else {
                 console.error("Erro: Usuário não encontrado no Firestore.");
             }
         }
 
-        // Função para carregar os dados dos usuários e exibir na tabela
         async function loadUsersData() {
             const usersRef = collection(db, "users");
             const querySnapshot = await getDocs(usersRef);
 
-            let totalUsers = 0;  // Contador para total de usuários
-            let totalInPrazo = 0;  // Contador para usuários com datas em prazo
-            let usersData = [];  // Array para armazenar os dados dos usuários
+            let totalUsers = 0;
+            let totalInPrazo = 0;
+            let usersData = [];
 
             querySnapshot.forEach((doc) => {
                 const userData = doc.data();
                 const userName = userData.name;
-                const expirationDate = userData.date || "Data não definida";  // Exibe a data como vem no Firestore
+                const userEmail = userData.email || "Não informado";
+                const expirationDate = userData.date || "Data não definida";
 
-                let expirationStatus = expirationDate;  // Exibe a data de expiração sem formatação
+                let expirationStatus = expirationDate;
 
-                // Função para converter a string dd/mm/yyyy para um objeto Date
                 function convertToDate(dateString) {
                     const [day, month, year] = dateString.split('/');
                     return new Date(`${month}/${day}/${year}`);
                 }
 
-                // Verifica se a data está no prazo e ajusta a exibição
                 if (expirationDate !== "Data não definida" && expirationDate !== "") {
                     const currentDate = new Date();
-                    const expiration = convertToDate(expirationDate);  // Converte a data de expiração para um objeto Date
+                    const expiration = convertToDate(expirationDate);
 
                     if (isNaN(expiration)) {
-                        // Se a data de expiração não for válida
                         expirationStatus = "INFINITO";
-                        totalInPrazo++;  // Inclui como dentro do prazo, mesmo sendo "data inválida"
+                        totalInPrazo++;
                     } else {
                         if (expiration < currentDate) {
                             expirationStatus = `Plano expirado em: ${expirationDate}`;
-                            // Não conta como dentro do prazo
                         } else {
-                            totalInPrazo++;  // Incrementa o contador se a data estiver dentro do prazo
+                            totalInPrazo++;
                             expirationStatus = `Plano válido até: ${expirationDate}`;
                         }
                     }
                 } else {
                     expirationStatus = "Data não definida";
-                    // Não incrementa o total de dentro do prazo se a data for "não definida"
                 }
 
-                usersData.push({ id: doc.id, name: userName, expirationStatus });  // Adiciona os dados no array
-                totalUsers++;  // Incrementa o contador de total de usuários
+                usersData.push({ id: doc.id, name: userName, email: userEmail, expirationStatus });
+                totalUsers++;
             });
 
-            // Ordena os usuários por nome (alfabeticamente)
             usersData.sort((a, b) => a.name.localeCompare(b.name));
 
             let tableContent = `
@@ -241,18 +225,19 @@
                         <tr>
                             <th>ID do Documento</th>
                             <th>Nome</th>
+                            <th>E-mail</th>
                             <th>Data de Expiração</th>
                         </tr>
                     </thead>
                     <tbody>
             `;
 
-            // Gera as linhas da tabela com os dados ordenados
             usersData.forEach(user => {
                 tableContent += `
                     <tr>
                         <td class="copyable" data-id="${user.id}">${user.id}</td>
                         <td>${user.name}</td>
+                        <td>${user.email}</td>
                         <td>${user.expirationStatus}</td>
                     </tr>
                 `;
@@ -260,24 +245,20 @@
 
             tableContent += `</tbody></table>`;
 
-            // Insere os totais antes da tabela
             const totalContent = `
                 <p><strong>Total de usuários existentes: </strong><span id="totalUsers">${totalUsers}</span></p>
                 <p><strong>Total de usuários com datas em prazo: </strong><span id="totalInPrazo">${totalInPrazo}</span></p>
             `;
 
-            // Insere os links e os totais depois da tabela
             const adminLinks = `
                 <div class="admin-links">
                     <a href="admin2.html">Atendimentos diversos</a>
                 </div>
             `;
 
-            // Insere tudo: totais, links e tabela
             const adminContentDiv = document.getElementById("adminContent");
             adminContentDiv.innerHTML = totalContent + adminLinks + tableContent;
 
-            // Adiciona evento de clique nas células de ID
             const copyableCells = document.querySelectorAll('.copyable');
             copyableCells.forEach(cell => {
                 cell.addEventListener('click', () => {
@@ -291,19 +272,17 @@
             });
         }
 
-        // Função para exibir a mensagem "Não autorizado!" se o usuário não for admin
         function showUnauthorizedMessage() {
             const adminContentDiv = document.getElementById("adminContent");
             adminContentDiv.innerHTML = "<h2 class='unauthorized'>Não autorizado! Você não é administrador. Obrigado</h2>";
         }
 
-        // Função para exibir a mensagem de cópia
         function showCopyMessage() {
             const copyMessageDiv = document.getElementById('copyMessage');
             copyMessageDiv.style.display = 'block';
             setTimeout(() => {
                 copyMessageDiv.style.display = 'none';
-            }, 2000);  // A mensagem desaparece após 2 segundos
+            }, 2000);
         }
     </script>
 </body>

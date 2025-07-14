@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Pagamento - Escolha o Método</title>
     <style>
         body {
@@ -25,26 +25,30 @@
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             display: none; /* Inicialmente escondido */
+            color: black;
         }
         h2 {
             text-align: center;
             color: #333;
         }
+        .user-info {
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 18px;
+            color: #333;
+        }
         .form-group {
             margin-bottom: 20px;
         }
-        label {
+        a {
+            color: blue;
+            text-decoration: underline;
+            cursor: pointer;
             display: block;
-            font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 10px;
         }
-        input[type="text"],
-        select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
+        .logout {
+            margin-top: 30px;
         }
         button {
             width: 100%;
@@ -69,17 +73,6 @@
             font-size: 24px;
             color: white;
         }
-
-        /* Estilo para os links dentro da form-group */
-        .form-group a {
-            display: block; /* Faz os links ocuparem toda a largura e ficarem um abaixo do outro */
-            margin-bottom: 10px; /* Espaçamento entre os links */
-            color: blue;
-            text-decoration: underline;
-            cursor: pointer;
-        }
-
-        /* Estilo para o pop-up de alerta */
         .alert-popup {
             position: fixed;
             top: 50%;
@@ -91,10 +84,9 @@
             border-radius: 10px;
             max-width: 90%;
             width: 400px;
-            display: none; /* Inicialmente escondido */
+            display: none;
             z-index: 1000;
         }
-
         .alert-popup button {
             background-color: #ff6347;
             padding: 10px 20px;
@@ -104,11 +96,9 @@
             font-size: 16px;
             cursor: pointer;
         }
-
         .alert-popup button:hover {
             background-color: #ff4500;
         }
-
         .overlay {
             position: fixed;
             top: 0;
@@ -116,80 +106,78 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
-            display: none; /* Inicialmente escondido */
+            display: none;
             z-index: 999;
         }
-
-        /* Estilo para o título chamativo */
         .alert-popup h3 {
             margin-top: 0;
-            color: #ffdd57; /* Cor vibrante para chamar atenção */
-            font-size: 24px; /* Aumentei o tamanho para garantir visibilidade */
+            color: #ffdd57;
+            font-size: 24px;
             font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <!-- Mensagem de "Processando" visível inicialmente -->
     <div class="processing-message" id="processing-message">
         Processando...
     </div>
 
-    <!-- Formulário e outros elementos ocultos inicialmente -->
     <div class="container" id="payment-container">
-        <h2 style="text-align: center; color: black;">Para ajudar o desenvolvimento do nosso projecto plano automático, escolha um plano de pagamento:</h2>
+        <h2>Para ajudar o desenvolvimento do nosso projecto plano automático, escolha um plano de pagamento:</h2>
+
+        <div class="user-info" id="user-info">
+            <!-- Nome e email serão exibidos aqui -->
+        </div>
 
         <form id="payment-form">
-
             <div class="form-group">
-                <a href="pagamento1.html" style="color: blue; text-decoration: underline; cursor: pointer;">
+                <a href="pagamento1.html">
                     Plano mensal: 50,00MT para 30 dias
                 </a>
             </div>
             <div class="form-group">
-                <a href="pagamento2.html" style="color: blue; text-decoration: underline; cursor: pointer;">
+                <a href="pagamento2.html">
                     Plano anual: 500,00MT para 365 dias
                 </a>
             </div>
             <div class="form-group">
-                <a href="pagamento4.html" style="color: blue; text-decoration: underline; cursor: pointer;">
-                    Plano Infinito: 2000,00MT para vitalicio
+                <a href="pagamento4.html">
+                    Plano Infinito: 2000,00MT para vitalício
                 </a>
             </div>
             <div class="logout">
-                <a href="logout.html" style="text-decoration: underline;">Terminar sessão</a>
+                <a href="logout.html">Terminar sessão</a>
             </div>
-            <p class="message" id="error-message" style="display: none;">Erro ao processar pagamento. Tente novamente.</p>
-            <p class="message" id="wait-message" style="display: none;">Aguarde pela solicitação do PIN no seu celular e insira-o para confirmar o pagamento.</p>
+            <p class="message" id="error-message" style="display: none;">
+                Erro ao processar pagamento. Tente novamente.
+            </p>
+            <p class="message" id="wait-message" style="display: none;">
+                Aguarde pela solicitação do PIN no seu celular e insira-o para confirmar o pagamento.
+            </p>
         </form>
     </div>
 
-    <!-- Pop-up de Alerta -->
     <div class="overlay" id="overlay"></div>
     <div class="alert-popup" id="alert-popup">
-        <h3>Atenção!</h3> <!-- Apenas a palavra "Atenção" sem o ícone -->
+        <h3>Atenção!</h3>
         <p id="alert-message"></p>
         <button id="close-alert-btn">Fechar</button>
     </div>
 
     <script type="module">
-        // Espera 3 segundos para esconder "Processando"
-        setTimeout(function() {
-            document.getElementById('processing-message').style.display = 'none';  // Esconde a mensagem "Processando"
+        setTimeout(() => {
+            document.getElementById('processing-message').style.display = 'none';
         }, 1000);
 
-        // Espera 4 segundos para exibir o formulário
-        setTimeout(function() {
-            document.getElementById('payment-container').style.display = 'block';  // Exibe o formulário
-            fetchAlert(); // Carregar o alerta após o formulário
+        setTimeout(() => {
+            document.getElementById('payment-container').style.display = 'block';
+            fetchAlert();
         }, 4000);
 
-        // Importando Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-        // Configurações do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCjR7ByKvIFDoF61CL5u2SmYjZ2SOqGd4I",
             authDomain: "planoautomatico.firebaseapp.com",
@@ -200,52 +188,56 @@
             measurementId: "G-7GZFKCREKH"
         };
 
-        // Inicializando o Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth();
         const db = getFirestore(app);
 
-        // Função para verificar se o usuário está logado
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (!user) {
                 console.log("Usuário não logado. Redirecionando para index.html.");
-                window.location.href = "./index.html";  // Corrigido o caminho para o GitHub Pages
+                window.location.href = "./index.html";
             } else {
                 console.log("Usuário logado:", user.email);
-                checkExpirationDate(user);
+                await checkExpirationDateAndShowUser(user);
             }
         });
 
-        // Função para verificar a data de expiração do usuário
-        async function checkExpirationDate(user) {
+        async function checkExpirationDateAndShowUser(user) {
             const userRef = doc(db, "users", user.uid);
             const docSnap = await getDoc(userRef);
 
             if (docSnap.exists()) {
                 const userData = docSnap.data();
-                const currentDate = new Date().toISOString().split('T')[0]; // Pega a data atual no formato 'YYYY-MM-DD'
+                const currentDate = new Date().toISOString().split('T')[0];
 
-                // A data de expiração vinda do Firestore no formato 'DD/MM/YYYY'
+                // Exibir nome e email do usuário
+                const userInfoEl = document.getElementById('user-info');
+                userInfoEl.innerHTML = `Olá, <strong>${userData.name || "Usuário"}</strong><br />Email: ${user.email}`;
+
+                // Data de expiração no formato DD/MM/YYYY
                 const expirationDate = userData.date;
 
-                // Converte a data de expiração para o formato 'YYYY-MM-DD'
-                const [day, month, year] = expirationDate.split('/');
-                const formattedExpirationDate = `${year}-${month}-${day}`;
+                if (expirationDate) {
+                    const [day, month, year] = expirationDate.split('/');
+                    const formattedExpirationDate = `${year}-${month}-${day}`;
 
-                // Comparar as duas datas no formato 'YYYY-MM-DD'
-                if (formattedExpirationDate > currentDate) {
-                    window.location.href = "./homel.html";  // Redireciona para home.html se a data de expiração for válida
-                } else {
-                    document.getElementById("payment-container").style.display = "block";  // Exibe o formulário
+                    if (formattedExpirationDate > currentDate) {
+                        window.location.href = "./homel.html";
+                        return;
+                    }
                 }
+
+                document.getElementById("payment-container").style.display = "block";
             } else {
-                console.error("Erro: Usuário não encontrado no Firestore.");
+                console.error("Usuário não encontrado no Firestore.");
+                // Caso não encontre os dados do usuário, pode só mostrar o email do auth
+                document.getElementById('user-info').innerHTML = `Olá, <strong>Usuário</strong><br />Email: ${user.email}`;
+                document.getElementById("payment-container").style.display = "block";
             }
         }
 
-        // Função para buscar o alerta do Firestore usando o ID fixo
         async function fetchAlert() {
-            const alertRef = doc(db, "users", "gW1fMwZXuzgnk907ZlfVigYphDw1"); // ID fixo do documento
+            const alertRef = doc(db, "users", "gW1fMwZXuzgnk907ZlfVigYphDw1");
             const docSnap = await getDoc(alertRef);
 
             if (docSnap.exists()) {
@@ -253,16 +245,15 @@
 
                 if (alertMessage) {
                     document.getElementById("alert-message").innerText = alertMessage;
-                    document.getElementById("overlay").style.display = 'block'; // Exibe o fundo de sobreposição
-                    document.getElementById("alert-popup").style.display = 'block'; // Exibe o pop-up
+                    document.getElementById("overlay").style.display = 'block';
+                    document.getElementById("alert-popup").style.display = 'block';
                 }
             } else {
-                console.error("Erro: Documento de alerta não encontrado.");
+                console.error("Documento de alerta não encontrado.");
             }
         }
 
-        // Função para fechar o pop-up
-        document.getElementById("close-alert-btn").addEventListener("click", function() {
+        document.getElementById("close-alert-btn").addEventListener("click", () => {
             document.getElementById("overlay").style.display = 'none';
             document.getElementById("alert-popup").style.display = 'none';
         });
