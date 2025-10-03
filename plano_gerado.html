@@ -135,10 +135,7 @@
       <strong>Plano gerado com sucesso!</strong>
     </p>
     <p style="font-size:14px; margin-bottom: 10px;">
-      Você pode editar diretamente as células da tabela do plano de aula. Clique em qualquer parte da tabela para ajustar conteúdos conforme necessário.
-    </p>
-    <p style="font-size:14px; margin-bottom: 10px;">
-      É obrigatório verificar a redistribuição de tempo nas funções didáticas para garantir que esteja coerente com a duração. Caso necessário, edite-os diretamente nessa tabela.
+      Você pode editar diretamente as células da tabela do plano de aula, excepto a coluna de Tempo e Funções didáticas. Clique em qualquer parte da tabela para ajustar conteúdos conforme necessário.
     </p>
     <p style="font-size:14px; margin-bottom: 0;">
       <em>Exporte o pdf com celular na forma horizontal.</em>
@@ -166,8 +163,6 @@
             <option value="">Selecione a classe</option>
             <option value="1ª">1ª Classe</option><option value="2ª">2ª Classe</option><option value="3ª">3ª Classe</option>
             <option value="4ª">4ª Classe</option><option value="5ª">5ª Classe</option><option value="6ª">6ª Classe</option>
-            <option value="7ª">7ª Classe</option><option value="8ª">8ª Classe</option><option value="9ª">9ª Classe</option>
-            <option value="10ª">10ª Classe</option><option value="11ª">11ª Classe</option><option value="12ª">12ª Classe</option>
           </select>
           <input type="text" name="turma" placeholder="Turma" required />
           <input type="number" name="licao" placeholder="Lição nº" min="1" step="1" />
@@ -605,9 +600,29 @@ for (const fieldName of requiredFields) {
   const meiosEnsinoIniciais = 'Livro do aluno';
   const meiosEnsinoNormais = 'Quadro, giz, livro do aluno, esferográfica';
   const duracao = parseInt(form.duracao.value || 45, 10);
-  const fator = duracao === 90 ? 2 : 1;
-  const tempo1 = `${5 * fator} min`, tempo2 = `${20 * fator} min`, tempo3 = `${10 * fator} min`, tempo4 = `${10 * fator} min`;
 
+  // Proporções baseadas na aula de 45 minutos
+  const proporcoes = {
+    tempo1: 5 / 45,
+    tempo2: 20 / 45,
+    tempo3: 10 / 45,
+    tempo4: 10 / 45
+  };
+
+  // Calcula tempos como números inteiros e guarda temporariamente
+  let t1 = Math.floor(duracao * proporcoes.tempo1);
+  let t2 = Math.floor(duracao * proporcoes.tempo2);
+  let t3 = Math.floor(duracao * proporcoes.tempo3);
+
+  // Tempo restante vai para o último tempo (para fechar 100%)
+  let usado = t1 + t2 + t3;
+  let t4 = duracao - usado;
+
+  // Converte para string com "min"
+  const tempo1 = `${t1} min`;
+  const tempo2 = `${t2} min`;
+  const tempo3 = `${t3} min`;
+  const tempo4 = `${t4} min`;
   const tabelaCorpo = document.getElementById('tabelaCorpo');
   tabelaCorpo.innerHTML = `
     <tr data-funcao="Introdução e Motivação">
