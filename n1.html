@@ -17,7 +17,7 @@
   </style>
 </head>
 <body>
-  <header>Plano automatico</header>
+  <header>Plano automático</header>
   <main>
     <h2>Seu plano está pronto</h2>
     <button class="btn-baixar" id="btnBaixar">📥 Baixar PDF</button>
@@ -184,7 +184,7 @@
       }
 
       // Anexo
-      (function renderAnexo() {
+      function renderAnexo() {
         const anexType = planoData.anexoTipo || (planoData.anexoSalvo && planoData.anexoSalvo.tipo);
         const anexImg = planoData.anexoImagem || (planoData.anexoSalvo && planoData.anexoSalvo.tipo === 'imagem' && planoData.anexoSalvo.data);
         const anexTxt = planoData.anexoTexto || (planoData.anexoSalvo && planoData.anexoSalvo.tipo === 'texto' && planoData.anexoSalvo.data);
@@ -194,6 +194,7 @@
         const margemX = 7;
         const pageW = doc.internal.pageSize.getWidth();
         const largura = pageW - 2 * margemX;
+
         let alturaBox = (anexType === 'imagem') ? 100 : 40;
 
         if (anexTxt && anexType === 'texto') {
@@ -201,19 +202,33 @@
           alturaBox = Math.max(40, Math.min(200, 10 + lines.length * 6));
         }
 
-        let posY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 8 : 20;
+        let posY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 8 : 20;  // Ajustar a posição do anexo
         const pageHeight = doc.internal.pageSize.getHeight();
+
+        // Flag para verificar se é a primeira página
+        let isFirstPage = true;
+
+        // Função para adicionar a palavra "ANEXO"
+        function adicionarTituloAnexo() {
+          if (isFirstPage) {
+            doc.setFont("Times", "bold");
+            doc.setFontSize(12);
+            doc.text("ANEXO", pageW / 2, posY, { align: "center" });
+            posY += 10; // Ajusta o Y após o título "ANEXO"
+            isFirstPage = false;  // Após a primeira página, a flag muda para false
+          }
+        }
+
+        // Se precisar adicionar uma nova página, já inicia com "ANEXO"
         if (posY + alturaBox + 10 > pageHeight) {
           doc.addPage();
           posY = 15;
+          adicionarTituloAnexo();
+        } else {
+          adicionarTituloAnexo(); // Se não precisar de nova página, adiciona diretamente
         }
 
-        doc.setDrawColor(0,0,0);
-        doc.rect(margemX, posY, largura, alturaBox);
-        doc.setFont("Times", "bold");
-        doc.setFontSize(12);
-        doc.text("ANEXO", margemX + largura / 2, posY + 8, { align: "center" });
-
+        // Se for imagem
         if (anexType === "imagem" && anexImg) {
           let fmt = 'PNG';
           try {
@@ -227,30 +242,27 @@
             doc.text("Erro ao inserir imagem do anexo.", margemX + 5, posY + 18);
           }
         } else if (anexType === "texto" && anexTxt) {
+          // Se for texto, apenas coloca o texto no PDF sem retângulo
           doc.setFont("Times", "normal");
-          if (posY + 30 > pageHeight) { doc.addPage(); posY = 15; }
-          doc.text("ANEXO", margemX + largura / 2, posY, { align: "center" });
-          doc.autoTable({
-            startY: posY + 5,
-            head: [],
-            body: [[anexTxt]],
-            margin: { left: margemX, right: margemX },
-            styles: {
-              font: 'times',
-              fontSize: 12,
-              halign: 'left',
-              valign: 'top',
-              overflow: 'linebreak',
-              cellPadding: 5,
-              textColor: [0, 0, 0]
-            },
-            tableLineWidth: 0.5,
-            tableLineColor: [0, 0, 0],
-            theme: 'grid',
-            columnStyles: { 0: { cellWidth: 'auto' } },
+          let textoQuebrado = doc.splitTextToSize(anexTxt, largura - 10);
+          let yTexto = posY + 12;
+
+          // Loop para adicionar as linhas do texto
+          textoQuebrado.forEach(line => {
+            // Verifica se o texto vai ultrapassar o fim da página
+            if (yTexto + 6 > pageHeight - 10) {
+              doc.addPage(); // Adiciona uma nova página
+              yTexto = 15; // Reinicia a posição no topo da nova página
+              adicionarTituloAnexo(); // Adiciona "ANEXO" na primeira página apenas
+            }
+            doc.text(line, margemX + 5, yTexto);
+            yTexto += 6;
           });
         }
-      })();
+      }
+
+
+      renderAnexo();
 
       const disciplina = planoData.disciplina || "";
       const classe = planoData.classe || "";
