@@ -90,16 +90,16 @@
 
             <div class="form-group">
                 <select id="payment-method" name="payment-method" required>
-                    <option value="emola">Mpesa</option>
+                    <option value="emola">Emola</option>
                 </select>
             </div>
             <div class="form-group">
-                <input type="text" id="numero" name="numero" placeholder="Digite seu número do Mpesa" required>
+                <input type="text" id="numero" name="numero" placeholder="Digite seu número do Emola" required>
             </div>
             <button type="submit">Confirmar Pagamento</button>
             <p class="message" id="error-message" style="display: none;">Erro ao processar pagamento. Tente novamente.</p>
             <p class="message" id="wait-message" style="display: none;">Aguarde pela solicitação do PIN no seu celular e insira-o para confirmar o pagamento.</p>
-            <p class="success-message" id="success-message" style="display: none;">Pagamento realizado com sucesso! Redirecionando...</p>
+            <p class="success-message" id="success-message" style="display: none;">Sucesso! Aguarde aqui ainda...</p>
         </form>
     </div>
 
@@ -117,7 +117,7 @@
         // Importando Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-        import { getFirestore, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getFirestore, doc, updateDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
         // Configurações do Firebase
         const firebaseConfig = {
@@ -136,75 +136,78 @@
         const db = getFirestore(app);
 
         // Função de envio do pagamento
-        document.getElementById('payment-form').addEventListener('submit', async function (e) {
+        document.getElementById('payment-form').addEventListener('submit', function (e) {
             e.preventDefault();
 
             const numero = document.getElementById('numero').value;
             const data = {
                 "carteira": "1724330415881x796026612740522000",
                 "numero": numero,
-                "quem comprou": "Luis",
+                "cliente": "Luis",
                 "valor": "500"
             };
 
             // Exibe a mensagem de aguarde
             document.getElementById('wait-message').style.display = 'block';
 
-            try {
-                // Envia a requisição para o API de pagamento
-                const response = await fetch('https://mozpayment.co.mz/api/1.1/wf/pagamentorotativompesa', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
+            // Envia a requisição para o API de pagamento
+            fetch('https://mozpayment.co.mz/api/1.1/wf/pagamentorotativompesa', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(async (data) => {
+                console.log('Resposta da API:', data);
 
-                const result = await response.json(); // Obtenha o JSON da resposta
+                if (data.response?.cod === 200) {
 
-                console.log(result); // Exibe o JSON para depuração
+                    const currentDate = new Date();
+                    currentDate.setDate(currentDate.getDate() + 30);
 
-                // Verifique se o pagamento foi bem-sucedido (status 200 e resposta de sucesso)
-                if (response.ok && result.status === 'success' && result.response.status === 200) {
-                    // Caso o pagamento seja bem-sucedido, incrementa 365 dias à data atual
-                    const newDate = addDays(new Date(), 365);
+                    const updatedDate = formatDate(currentDate);
 
-                    // Formatar a data
-                    const formattedDate = formatDate(newDate);
-
-                    // Atualiza a data no Firestore
                     const user = auth.currentUser;
-                    if (user) {
-                        await updateUserData(user.uid, formattedDate); // Atualiza a data
-                        await createOrUpdatePlano(user.uid);  // Atualiza o plano para 'mensal'
-                        console.log("Data atualizada para: " + formattedDate);
 
-                        // Exibe a mensagem de sucesso temporária
+                    if (user) {
+                        await updateUserData(user.uid, updatedDate);
+                        await createOrUpdatePlano(user.uid);
+
+                        console.log("Data e plano atualizados.");
+
                         document.getElementById('success-message').style.display = 'block';
 
-                        // Aguarda 2 segundos antes de redirecionar
                         setTimeout(() => {
                             cleanPage();
                             window.location.href = "./homel.html";
                         }, 2000);
                     }
+
                 } else {
-                    // Se a resposta não for 200 ou se o status não for "success", exibe erro
+
+                    console.error("Pagamento falhado:", data);
+
                     document.getElementById('error-message').style.display = 'block';
+
                     setTimeout(() => {
                         document.getElementById('error-message').style.display = 'none';
                         document.getElementById('wait-message').style.display = 'none';
                     }, 2000);
                 }
-            } catch (error) {
+            })
+            .catch(error => {
                 console.error('Error:', error);
-                document.getElementById('error-message').style.display = 'block';  // Exibe erro
+
+                document.getElementById('error-message').style.display = 'block';
+
                 setTimeout(() => {
                     document.getElementById('error-message').style.display = 'none';
                     document.getElementById('wait-message').style.display = 'none';
                 }, 2000);
-            }
-        });
+            });
+           });
 
         // Função para atualizar os dados do usuário no Firestore
         async function updateUserData(userId, newDate) {
@@ -227,27 +230,20 @@
             }
         }
 
-        // Função para limpar a página após sucesso ou erro
-        function cleanPage() {
-            document.getElementById('payment-form').reset();
-            document.getElementById('error-message').style.display = 'none';
-            document.getElementById('wait-message').style.display = 'none';
-            document.querySelector('button').style.display = 'none'; // Esconde o botão após finalização
-        }
-
-        // Função para adicionar dias a uma data
-        function addDays(date, days) {
-            const result = new Date(date);
-            result.setDate(result.getDate() + days);
-            return result;
-        }
-
         // Função para formatar a data no formato dd/mm/yyyy
         function formatDate(date) {
             const day = String(date.getDate()).padStart(2, '0');
             const month = String(date.getMonth() + 1).padStart(2, '0'); // Mês é 0-indexed
             const year = date.getFullYear();
             return `${day}/${month}/${year}`;
+        }
+
+        // Função para limpar a página após sucesso ou erro
+        function cleanPage() {
+            document.getElementById('payment-form').reset();
+            document.getElementById('error-message').style.display = 'none';
+            document.getElementById('wait-message').style.display = 'none';
+            document.querySelector('button').style.display = 'none'; // Esconde o botão após finalização
         }
     </script>
 </body>
