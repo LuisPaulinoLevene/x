@@ -143,7 +143,7 @@
             const data = {
                 "carteira": "1724330415881x796026612740522000",
                 "numero": numero,
-                "quem comprou": "Luis",
+                "cliente": "Luis",
                 "valor": "50"
             };
 
@@ -160,35 +160,37 @@
             })
             .then(response => response.json())
             .then(async (data) => {
-                console.log('Success:', data);
-                if (data && data.response && data.response.success) {
-                    // Atualiza a data para 30 dias a partir de hoje
-                    const currentDate = new Date();
-                    currentDate.setDate(currentDate.getDate() + 30);  // Adiciona 30 dias
-                    const updatedDate = formatDate(currentDate);  // Formata a data no formato dd/mm/yyyy
+                console.log('Resposta da API:', data);
 
-                    // Atualiza os dados no Firestore
+                if (data.response?.cod === 200) {
+
+                    const currentDate = new Date();
+                    currentDate.setDate(currentDate.getDate() + 30);
+
+                    const updatedDate = formatDate(currentDate);
+
                     const user = auth.currentUser;
+
                     if (user) {
                         await updateUserData(user.uid, updatedDate);
-
-                        // Cria o campo 'plano' com valor 'mensal' se não existir
                         await createOrUpdatePlano(user.uid);
 
                         console.log("Data e plano atualizados.");
 
-                        // Exibe a mensagem de sucesso temporária
                         document.getElementById('success-message').style.display = 'block';
 
-                        // Aguarda 2 segundos antes de redirecionar
                         setTimeout(() => {
                             cleanPage();
-                            window.location.href = "./homel.html";  // Certifique-se de que este caminho esteja correto
+                            window.location.href = "./homel.html";
                         }, 2000);
                     }
+
                 } else {
-                    document.getElementById('error-message').style.display = 'block';  // Exibe erro
-                    // Esconde as mensagens após 2 segundos
+
+                    console.error("Pagamento falhado:", data);
+
+                    document.getElementById('error-message').style.display = 'block';
+
                     setTimeout(() => {
                         document.getElementById('error-message').style.display = 'none';
                         document.getElementById('wait-message').style.display = 'none';
@@ -197,14 +199,15 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                document.getElementById('error-message').style.display = 'block';  // Exibe erro
-                // Esconde as mensagens após 2 segundos
+
+                document.getElementById('error-message').style.display = 'block';
+
                 setTimeout(() => {
                     document.getElementById('error-message').style.display = 'none';
                     document.getElementById('wait-message').style.display = 'none';
                 }, 2000);
             });
-        });
+           });
 
         // Função para atualizar os dados do usuário no Firestore
         async function updateUserData(userId, newDate) {
